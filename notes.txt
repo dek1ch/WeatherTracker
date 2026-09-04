@@ -1,0 +1,4 @@
+температура в <p> с классом: AppHourlyItem_main__HNbqX 
+доп описание в <p> с классами: A11Y_visuallyHidden__y0sw0 visuallyHidden
+
+контейнер <li> с почасовой погодой (класс): AppHourlyItem_container__aqC1z
