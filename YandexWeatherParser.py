@@ -1,5 +1,6 @@
+import re
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 
 class WeatherParser:
@@ -26,28 +27,64 @@ class WeatherParser:
         Функцмя для получения списка в формате: 
         [дата, время, температура, как ощущается, погода, вероятность дождя(в %)]
         """
+        days = ["понедельник", "вторник", "среда", "четверг", "пятница", "суббота", "воскресенье"]
+
         response = requests.get(self.__url)
         response.encoding = 'utf-8'
 
         soup = BeautifulSoup(response.text, 'html.parser')
-        info = soup.find_all('li', class_='AppHourlyItem_container__aqC1z')
+        information_list = soup.find_all('li', class_='AppHourlyItem_container__aqC1z')
 
-        dt = datetime.now()
-        date = dt.strftime("%d.%m.%Y")
+        date = datetime.now()
 
-        if info:
+        prev_hour = date.hour
+        is_nextDay = False
+
+        if information_list:
+            # with open("page.html", "w", encoding="utf-8") as f:
+            #     f.write(soup.prettify())
             with open("test.txt", "w", encoding="utf-8") as f:
-                for i in info:
+                for i in information_list:
                     data = i.find('p', class_="A11Y_visuallyHidden__y0sw0 visuallyHidden").text.strip()
-
-                    if not data[0].isdigit():
-                        f.write(data + f"\n")
-                        continue
-
-                    time = data[0:5]
-                    print(time)
-
                     f.write(data + f"\n")
+
+                    # Разбиение строки с погодой на данные с помощью регулярных выражений
+                    today = re.search(r'[а-я]+,', data) #Для контроял даты
+                    hour = re.search(r'\d\d:\d\d', data) #Час прогноза погоды
+                    temperature = re.search(r'[+-]\d{1,3}°,', data) #Температура
+                    apparent_temperature = re.search(r'[+-]\d{1,3}°.', data) #Какая температура будет ощущаться
+                    weather = re.search(r', [а-я ]+,', data) #Погода
+                    probability_of_rain = re.search(r'\d{1,2}%', data) #Вероятность дождя(если тот будет)
+
+                    if today:
+                        if today.group()[:-1] in days:
+                            is_nextDay = True
+                            date += timedelta(days=1)
+                            prev_hour = 0
+                            print("сегодня:", today.group()[:-1])
+
+                    if hour and temperature and apparent_temperature and weather:
+                        if probability_of_rain:
+                            print(hour.group(), temperature.group()[:-1], "Ощущается как: " + apparent_temperature.group()[:-1], weather.group()[2:-1], probability_of_rain.group())
+                        else:
+                            print(hour.group(), temperature.group()[:-1], "Ощущается как: " + apparent_temperature.group()[:-1], weather.group()[2:-1])
+
+                    if (int(hour.group()[0:2]) - prev_hour) < 0 and is_nextDay : break
+                    prev_hour = int(hour.group()[0:2])
+                    
+
+
+
+
+
+                    # if not data[0].isdigit():
+                    #     f.write(data + f"\n")
+                    #     continue
+
+                    # time = data[0:5]
+                    # print(time)
+
+                    # f.write(data + f"\n")
 
                     #f.write([date, temperature, apparent_temperature, weather, probability_of_rain])
 
