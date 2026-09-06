@@ -1,10 +1,10 @@
-from YandexWeatherParser import WeatherParser
+from WeatherParser import YandexWeatherParser
 
 if __name__ == "__main__":
-    par = WeatherParser()
+    yPar = YandexWeatherParser()
 
-    par.setPosition(37.6177, 55.755863)
-    weather = par.get_hourly_weather()
+    yPar.setPosition(37.6177, 55.755863)
+    weather = yPar.get_hourly_weather()
 
     for i in weather:
         print(i)

@@ -3,7 +3,7 @@ import requests
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 
-class WeatherParser:
+class YandexWeatherParser:
     """
     Класс для получения погоды с сервиса Яндекс погоды
     """
