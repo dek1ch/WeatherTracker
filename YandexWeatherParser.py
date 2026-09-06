@@ -27,6 +27,7 @@ class WeatherParser:
         Функцмя для получения списка в формате: 
         [дата, время, температура, как ощущается, погода, вероятность дождя(в %)]
         """
+        output = list()
         days = ["понедельник", "вторник", "среда", "четверг", "пятница", "суббота", "воскресенье"]
 
         response = requests.get(self.__url)
@@ -41,59 +42,35 @@ class WeatherParser:
         is_nextDay = False
 
         if information_list:
-            # with open("page.html", "w", encoding="utf-8") as f:
-            #     f.write(soup.prettify())
-            with open("test.txt", "w", encoding="utf-8") as f:
-                for i in information_list:
-                    data = i.find('p', class_="A11Y_visuallyHidden__y0sw0 visuallyHidden").text.strip()
-                    f.write(data + f"\n")
+            for i in information_list:
+                data = i.find('p', class_="A11Y_visuallyHidden__y0sw0 visuallyHidden").text.strip()
 
-                    # Разбиение строки с погодой на данные с помощью регулярных выражений
-                    today = re.search(r'[а-я]+,', data) #Для контроял даты
-                    hour = re.search(r'\d\d:\d\d', data) #Час прогноза погоды
-                    temperature = re.search(r'[+-]\d{1,3}°,', data) #Температура
-                    apparent_temperature = re.search(r'[+-]\d{1,3}°.', data) #Какая температура будет ощущаться
-                    weather = re.search(r', [а-я ]+,', data) #Погода
-                    probability_of_rain = re.search(r'\d{1,2}%', data) #Вероятность дождя(если тот будет)
+                # Разбиение строки с погодой на данные с помощью регулярных выражений
+                today = re.search(r'[а-я]+,', data) #Для контроял даты
+                hour = re.search(r'\d\d:\d\d', data) #Час прогноза погоды
+                temperature = re.search(r'[+-]\d{1,3}°,', data) #Температура
+                apparent_temperature = re.search(r'как [+-]\d{1,3}°', data) #Какая температура будет ощущаться
+                weather = re.search(r', [а-я ]+,', data) #Погода
+                probability_of_rain = re.search(r'\d{1,2}%', data) #Вероятность дождя(если тот будет)
 
-                    if today:
-                        if today.group()[:-1] in days:
-                            is_nextDay = True
-                            date += timedelta(days=1)
-                            prev_hour = 0
-                            print("сегодня:", today.group()[:-1])
+                if today and today.group()[:-1] in days:
+                    prev_hour = 0
+                    is_nextDay = True
+                    date += timedelta(days=1)
 
-                    if hour and temperature and apparent_temperature and weather:
-                        if probability_of_rain:
-                            print(hour.group(), temperature.group()[:-1], "Ощущается как: " + apparent_temperature.group()[:-1], weather.group()[2:-1], probability_of_rain.group())
-                        else:
-                            print(hour.group(), temperature.group()[:-1], "Ощущается как: " + apparent_temperature.group()[:-1], weather.group()[2:-1])
+                if (int(hour.group()[0:2]) - prev_hour) < 0 and is_nextDay : break
+                prev_hour = int(hour.group()[0:2])
 
-                    if (int(hour.group()[0:2]) - prev_hour) < 0 and is_nextDay : break
-                    prev_hour = int(hour.group()[0:2])
-                    
-
-
-
-
-
-                    # if not data[0].isdigit():
-                    #     f.write(data + f"\n")
-                    #     continue
-
-                    # time = data[0:5]
-                    # print(time)
-
-                    # f.write(data + f"\n")
-
-                    #f.write([date, temperature, apparent_temperature, weather, probability_of_rain])
-
+                if weather:
+                    output.append([date.strftime("%d.%m.%Y"), hour.group(), temperature.group()[:-1], apparent_temperature.group()[4:], weather.group()[2:-1], probability_of_rain.group() if probability_of_rain else None])
+        return output if output else None
 
     def updatePos(self):
         """
         Функция обновления ссылки для парсинга
         """
         self.__url = f"https://yandex.ru/pogoda/ru/moscow?lat={self.__latitude}&lon={self.__longitude}"
+        print(self.__url)
 
     def setPosition(self, x: float, y: float):
         """
