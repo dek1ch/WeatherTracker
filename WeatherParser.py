@@ -72,16 +72,16 @@ class YandexWeatherParser:
         self.__url = f"https://yandex.ru/pogoda/ru/moscow?lat={self.__latitude}&lon={self.__longitude}"
         print(self.__url)
 
-    def setPosition(self, x: float, y: float):
+    def setPosition(self, longitude: float, latitude: float):
         """
         Сеттер позиции, где будет проверяться погода
 
         Args:
-            y: Широта
-            x: Долгота
+            latitude: Широта
+            longitude: Долгота
         """
-        self.__longitude = x
-        self.__latitude = y
+        self.__longitude = longitude
+        self.__latitude = latitude
         self.updatePos()
         
     def getPosition(self) -> list:

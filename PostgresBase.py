@@ -5,7 +5,7 @@ class PostgresBase:
 
     def __init__(self, dbname, user, password, host="127.0.0.1", port="5432"):
         """
-        Конструктор класса PostgreBase
+        Конструктор класса PostgresBase
 
         Args:
             dbname: Название базы данных
